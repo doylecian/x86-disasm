@@ -3,18 +3,43 @@
 
 extern crate test;
 mod asm_metadata;
-use std::io;
+use std::io::{self, BufReader, BufWriter};
 use std::io::prelude::*;
 use std::fs::File;
 
 use asm_metadata::TARGET_MACHINE_TYPES;
 
 fn main() -> io::Result<()> {
+
     let file = File::open(r"D:\Games\AssaultCube\bin_win32\ac_client.exe").expect("Couldn't read file");
+    let byte_count = file.metadata().unwrap().len();
+
+    println!("Opened file of size {:X}", byte_count);
+
+    let mut read_buf = BufReader::new(file);
+    let output_file = File::create("asm_dump.txt").unwrap();
+    let mut write_buf =  BufWriter::new(output_file);
+    write_buf.write(b"0x00000000\t\t").expect("Couldn't write bytes to file");
+
+    let mut byte_count = 1;
+    for byte in read_buf.by_ref().bytes().by_ref() {
+        match byte {
+            Ok(byte) => {
+                if byte_count % 16 == 0 {
+                    write_buf.write_fmt(format_args!("{:#X}\n{:#010X}\t\t", byte, byte_count)).expect("Couldn't write bytes to file");
+                }
+                else {
+                    write_buf.write_fmt(format_args!("{:#X} ", byte)).expect("Couldn't write bytes to file");
+                }
+                byte_count += 1;
+            }
+            _ => break
+        }
+    }
 
     println!("\n--- HEX DUMP ---\n");
-
-    let mut byte_iter = file.bytes();
+    read_buf.rewind().unwrap();
+    let mut byte_iter = read_buf.bytes();
 
     let mut buf = [0u8; 2];
     match (&mut byte_iter).nth(0x3C) {
@@ -53,7 +78,6 @@ fn main() -> io::Result<()> {
 
     let target_machine_type = TARGET_MACHINE_TYPES.get(&u16::from_ne_bytes(buf));
     print!("Target machine: {:X?} ({})\n", u16::from_ne_bytes(buf), target_machine_type.unwrap());
-
 
     Ok(())
 }
