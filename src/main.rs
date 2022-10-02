@@ -3,15 +3,21 @@
 
 extern crate test;
 mod asm_metadata;
+use std::fmt::Error;
 use std::io::{self, BufReader, BufWriter};
 use std::io::prelude::*;
 use std::fs::File;
 
 use asm_metadata::TARGET_MACHINE_TYPES;
 
-fn main() -> io::Result<()> {
+fn main() { 
+    read_meta_data(r"D:\Games\AssaultCube\bin_win32\ac_client.exe");
+}
 
-    let file = File::open(r"D:\Games\AssaultCube\bin_win32\ac_client.exe").expect("Couldn't read file");
+
+// Reads the metadata of a binary and returns information required to parse such as compilation target, sections, etc
+fn read_meta_data(filename: &str) -> Result<PEHeader, Error> {
+    let file = File::open(filename).expect("Couldn't read file");
     let byte_count = file.metadata().unwrap().len();
 
     println!("Opened file of size {:X}", byte_count);
@@ -79,5 +85,9 @@ fn main() -> io::Result<()> {
     let target_machine_type = TARGET_MACHINE_TYPES.get(&u16::from_ne_bytes(buf));
     print!("Target machine: {:X?} ({})\n", u16::from_ne_bytes(buf), target_machine_type.unwrap());
 
-    Ok(())
+    Ok(PEHeader {  })
+}
+
+struct PEHeader {
+
 }
