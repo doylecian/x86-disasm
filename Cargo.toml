@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 # to use `phf` in `no_std` environments
 phf = { version = "0.11", features = ["macros"] }
+eframe = "0.19.0"

@@ -3,17 +3,20 @@
 
 extern crate test;
 mod asm_metadata;
+mod gui;
 use std::fmt::Error;
 use std::io::{self, BufReader, BufWriter};
 use std::io::prelude::*;
 use std::fs::File;
 
 use asm_metadata::TARGET_MACHINE_TYPES;
+use gui::DisassemblyApp;
 
 fn main() { 
-    read_meta_data(r"D:\Games\AssaultCube\bin_win32\ac_client.exe");
+    // read_meta_data(r"D:\Games\AssaultCube\bin_win32\ac_client.exe");
+    let native_options = eframe::NativeOptions::default();
+    eframe::run_native("Disassembler", native_options, Box::new(|cc| Box::new(DisassemblyApp::new(cc))));
 }
-
 
 // Reads the metadata of a binary and returns information required to parse such as compilation target, sections, etc
 fn read_meta_data(filename: &str) -> Result<PEHeader, Error> {
@@ -90,4 +93,4 @@ fn read_meta_data(filename: &str) -> Result<PEHeader, Error> {
 
 struct PEHeader {
 
-}
+} 
